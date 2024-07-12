@@ -40,9 +40,9 @@ if 'personal_details' not in st.session_state:
 def streamlit_config():
 
     # page configuration
-    st.set_page_config(page_title='Resume Analyzer AI', layout="wide")
+    st.set_page_config(page_title='AI Resume Analyzer', layout="wide")
 
-    # page header transparent color
+    # page header 
     page_background_color = """
     <style>
 
@@ -55,23 +55,23 @@ def streamlit_config():
     """
     st.markdown(page_background_color, unsafe_allow_html=True)
 
-    # title and position
-    st.markdown(f'<h1 style="text-align: center;">AI-Powered Resume Analyzer and <br> LinkedIn Scraper with Selenium</h1>',
+    # title of the app
+    st.markdown(f'<h1 style="text-align: center;">AI Resume Analyzer and LinkedIn Job Recomendation Bot</h1>',
                 unsafe_allow_html=True)
 
 
 class resume_analyzer:
 
     def pdf_to_chunks(pdf):
-        # read pdf and it returns memory address
+        # reading the pdf 
         pdf_reader = PdfReader(pdf)
 
-        # extrat text from each page separately
+        # extracting the text 
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text()
 
-        # Split the long text into small chunks.
+        # Splitting the long text into small chunks.
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=700,
             chunk_overlap=200,
@@ -83,19 +83,19 @@ class resume_analyzer:
 
     def openai(openai_api_key, chunks, analyze):
 
-        # Using OpenAI service for embedding
+        # Using the OpenAI service for embedding
         embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
-        # Facebook AI Similarity Serach library help us to convert text data to numerical vector
+        # FAISS library help us to convert text data to numerical vector
         vectorstores = FAISS.from_texts(chunks, embedding=embeddings)
 
-        # compares the query and chunks, enabling the selection of the top 'K' most similar chunks based on their similarity scores.
+        # comparing the query and chunks, enabling the selection of the top 'K' most similar chunks based on their similarity scores.
         docs = vectorstores.similarity_search(query=analyze, k=3)
 
-        # creates an OpenAI object, using the ChatGPT 3.5 Turbo model
+        # creating an OpenAI chat model, using the ChatGPT 3.5 Turbo model
         llm = ChatOpenAI(model='gpt-3.5-turbo', api_key=openai_api_key)
 
-        # question-answering (QA) pipeline, making use of the load_qa_chain function
+        # creating a question-answering (QA) pipeline chain
         chain = load_qa_chain(llm=llm, chain_type='stuff')
 
         response = chain.run(input_documents=docs, question=analyze)
@@ -115,20 +115,20 @@ class resume_analyzer:
 
         with st.form(key='Contact'):
 
-            # User Upload the Resume
+            # User Uploads the Resume
             add_vertical_space(1)
             pdf = st.file_uploader(label='Upload Your Resume', type='pdf')
             st.session_state.pdf=pdf
             add_vertical_space(1)
 
-            # Enter OpenAI API Key
+            # User enters OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
                 openai_api_key = st.text_input(label='Enter OpenAI API Key', type='password')
                 st.session_state.openai_api_key=openai_api_key
             add_vertical_space(2)
 
-            # Click on Submit Button
+            # User clicks on Submit Button
             submit = st.form_submit_button(label='Submit')
             add_vertical_space(1)
 
@@ -155,8 +155,6 @@ class resume_analyzer:
             elif openai_api_key == '':
                 st.markdown(f'<h5 style="text-align: center;color: orange;">Please Enter OpenAI API Key</h5>', unsafe_allow_html=True)
 
-
-
     def summary_prompt(query_with_chunks):
 
         query = f''' need to detailed summarization of below resume and finally conclude them
@@ -172,18 +170,18 @@ class resume_analyzer:
 
         with st.form(key='Summary'):
 
-            # User Upload the Resume
+            # loading the Resume
             add_vertical_space(1)
             pdf = st.session_state.pdf
             add_vertical_space(1)
 
-            # Enter OpenAI API Key
+            # loading the OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
                 openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
-            # Click on Submit Button
+            # User slicks on Submit Button
             submit = st.form_submit_button(label='Submit')
             add_vertical_space(1)
         
@@ -225,18 +223,18 @@ class resume_analyzer:
 
         with st.form(key='Strength'):
 
-            # User Upload the Resume
+            # loading the Resume
             add_vertical_space(1)
             pdf = st.session_state.pdf
             add_vertical_space(1)
 
-            # Enter OpenAI API Key
+            # loading the OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
                 openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
-            # Click on Submit Button
+            # User clicks on Submit Button
             submit = st.form_submit_button(label='Submit')
             add_vertical_space(1)
 
@@ -278,18 +276,18 @@ class resume_analyzer:
 
         with st.form(key='Weakness'):
 
-            # User Upload the Resume
+            # loading the Resume
             add_vertical_space(1)
             pdf = st.session_state.pdf
             add_vertical_space(1)
 
-            # Enter OpenAI API Key
+            # loading the OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
                 openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
-            # Click on Submit Button
+            # User clicks on Submit Button
             submit = st.form_submit_button(label='Submit')
             add_vertical_space(1)
         
@@ -332,18 +330,18 @@ class resume_analyzer:
 
         with st.form(key='Job Titles'):
 
-            # User Upload the Resume
+            # Loading the Resume
             add_vertical_space(1)
             pdf = st.session_state.pdf
             add_vertical_space(1)
 
-            # Enter OpenAI API Key
+            # ELoading the OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
                 openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
-            # Click on Submit Button
+            # User clicks on Submit Button
             submit = st.form_submit_button(label='Submit')
             add_vertical_space(1)
 
@@ -683,12 +681,13 @@ def pdf_creator():
                         # saving the output
                         pdf_output = pdf.output(dest='S')
 
-                        # Encode the PDF output as base64
+                        # Encodeing the PDF output as base64
                         b64 = base64.b64encode(pdf_output).decode()
-                        
+
+                        #PDF creation message
                         st.success('PDF created successfully!')
                         
-                        # Download button
+                        # Creating a Download button
                         st.markdown(get_binary_file_downloader_html(b64, 'Analyzed_Resume.pdf', 'Download PDF'), unsafe_allow_html=True)
                     
                         
@@ -700,45 +699,51 @@ def get_binary_file_downloader_html(bin_file, file_label='File', button_text='Do
     bin_str = f'data:application/octet-stream;base64,{bin_file}'
     return f'<a href="{bin_str}" download="{file_label}">{button_text}</a>'
 
-# Streamlit Configuration Setup
+# Streamlit Setup
 streamlit_config()
 add_vertical_space(5)
 
-
+# Personal Details:
 st.markdown(f'<h4>Personal Details:</h4>',
                 unsafe_allow_html=True)
 resume_analyzer.personal_details()
 st.markdown(f'<h4 style="color: orange;">Personal Details:</h4>', unsafe_allow_html=True)
 st.write(st.session_state.personal_details)
 
+# Summary:
 st.markdown(f'<h4>Summary:</h4>',
                 unsafe_allow_html=True)
 resume_analyzer.resume_summary()
 st.markdown(f'<h4 style="color: orange;">Summary:</h4>', unsafe_allow_html=True)
 st.write(st.session_state.summary)
 
+# Strength:
 st.markdown(f'<h4>Strength:</h4>',
                 unsafe_allow_html=True)
 resume_analyzer.resume_strength()
 st.markdown(f'<h4 style="color: orange;">Strength:</h4>', unsafe_allow_html=True)
 st.write(st.session_state.strength)
 
+#Weakness:
 st.markdown(f'<h4>Weakness:</h4>',
                 unsafe_allow_html=True)
 resume_analyzer.resume_weakness()
 st.markdown(f'<h4 style="color: orange;">Weakness:</h4>', unsafe_allow_html=True)
 st.write(st.session_state.weakness)
 
-st.markdown(f'<h4>Job Title:</h4>',
+# Job Titles:
+st.markdown(f'<h4>Job Titles:</h4>',
                 unsafe_allow_html=True)
 resume_analyzer.job_title_suggestion()
-st.markdown(f'<h4 style="color: orange;">Job Titles:</h4>', unsafe_allow_html=True)
+st.markdown(f'<h4 style="color: orange;">Job Titless:</h4>', unsafe_allow_html=True)
 st.write(st.session_state.job_title)
 
+# LinkedIn Jobs:
 st.markdown(f'<h4>Linedin Jobs:</h4>',
                 unsafe_allow_html=True)
 linkedin_scraper.main()
 
+#Creating the PDF
 st.markdown(f'<h4>Create PDF:</h4>',
                 unsafe_allow_html=True)
 pdf_creator()
