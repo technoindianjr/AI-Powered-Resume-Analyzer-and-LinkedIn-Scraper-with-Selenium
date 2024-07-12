@@ -643,12 +643,12 @@ def pdf_creator():
         add_vertical_space(1)
         add_vertical_space(1)
         add_vertical_space(2)
-        submit = st.form_submit_button(label='Create PDF')
+        submit = st.form_submit_button(label='Generate')
         add_vertical_space(1)
 
         if submit:
                 try:
-                    with st.spinner('Creating PDF...'):
+                    with st.spinner('Generating PDF...'):
 
                         pdf=FPDF('p','mm','A4')
                         pdf.add_page()
@@ -748,7 +748,7 @@ st.markdown(f'<h4>Linedin Jobs:</h4>',
 linkedin_scraper.main()
 
 #Creating the PDF
-st.markdown(f'<h4>Create PDF:</h4>',
+st.markdown(f'<h4>Generate PDF:</h4>',
                 unsafe_allow_html=True)
 pdf_creator()
 
