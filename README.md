@@ -1,4 +1,4 @@
-# AI-Powered Resume Analyzer and LinkedIn Scraper with Selenium
+# AI Resume Analyzer and Linkedin Job Recomendation Bot
 
 **Introduction**
 
@@ -8,13 +8,11 @@ Resume Analyzer AI" leverages the power of LLM and OpenAI as an advanced Streaml
 
 **Table of Contents**
 
-1. Key Technologies and Skills
+1. Tech Stack
 2. Installation
 3. Usage
 4. Features
-5. Contributing
-6. License
-7. Contact
+5. Contact
 
 <br />
 
@@ -28,7 +26,8 @@ Resume Analyzer AI" leverages the power of LLM and OpenAI as an advanced Streaml
 - Selenium
 - Streamlit
 - Hugging Face
-- AWS
+- Techno NJR Cloud
+- FPDF
 
 <br />
 
@@ -37,17 +36,7 @@ Resume Analyzer AI" leverages the power of LLM and OpenAI as an advanced Streaml
 To run this project, you need to install the following packages:
 
 ```python
-pip install numpy
-pip install pandas
-pip install streamlit
-pip install streamlit_option_menu
-pip install streamlit_extras
-pip install PyPDF2
-pip install langchain
-pip install openai
-pip install tiktoken
-pip install faiss-cpu
-pip install selenium
+pip install -r requirements.txt
 ```
 
 <br />
@@ -56,8 +45,7 @@ pip install selenium
 
 To use this project, follow these steps:
 
-1. Clone the repository: ```https://github.com/gopiashokan/AI-Powered-Resume-Analyzer-and-LinkedIn-Scraper-with-Selenium.git```
-2. Install the required packages: ```pip install -r requirements.txt```
+1. Clone the repository: ```https://github.com/technoindianjr/AI-Powered-Resume-Analyzer-and-LinkedIn-Scraper-with-Sele>2. Install the required packages: ```pip install -r requirements.txt```
 3. Run the Streamlit app: ```streamlit run app.py```
 4. Access the app in your browser at ```http://localhost:8501```
 
@@ -93,37 +81,13 @@ To use this project, follow these steps:
 
 <br />
 
-🚀 **Streamlit application:** [https://huggingface.co/spaces/gopiashokan/Resume-Analyzer-AI](https://huggingface.co/spaces/gopiashokan/Resume-Analyzer-AI)
-
-<br />
-
 **Selenium-Powered LinkedIn Data Scraping:**
 - Utilizing Selenium and a Webdriver automated test tool, this feature enables users to input job titles, automating the data scraping process from LinkedIn. The scraped data includes crucial details such as company names, job titles, locations, URLs, and comprehensive job descriptions.
 - This streamlined process enables users to easily review scraped job details and apply for positions, simplifying their job search and application experience.
 
-<br />
-
-🎥 **Project Demo Video:** [https://youtu.be/wFouWeK7NPg](https://youtu.be/wFouWeK7NPg)
-
-<br />
-
-**Contributing**
-
-Contributions to this project are welcome! If you encounter any issues or have suggestions for improvements, please feel free to submit a pull request.
-
-<br />
-
-**License**
-
-This project is licensed under the MIT License. Please review the LICENSE file for more details.
-
-<br />
-
 **Contact**
 
-📧 Email: gopiashokankiot@gmail.com 
+📧 Email: vanshbhatnagar445@gmail.com
 
-🌐 LinkedIn: [linkedin.com/in/gopiashokan](https://www.linkedin.com/in/gopiashokan)
-
-For any further questions or inquiries, feel free to reach out. We are happy to assist you with any queries.
+🌐 LinkedIn: https://www.linkedin.com/in/vansh-bhatnagar-66465225b/
 

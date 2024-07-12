@@ -6,16 +6,35 @@ from streamlit_option_menu import option_menu
 from streamlit_extras.add_vertical_space import add_vertical_space
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chat_models import ChatOpenAI
+from langchain_community.embeddings.openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.chat_models import ChatOpenAI
 from langchain.chains.question_answering import load_qa_chain
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+from fpdf import FPDF
+import base64
 import warnings
 warnings.filterwarnings('ignore')
+
+if 'pdf_chunks' not in st.session_state:
+    st.session_state.pdf_chunks = "None"
+if 'summary' not in st.session_state:
+    st.session_state.summary = "None"
+if 'strength' not in st.session_state:
+    st.session_state.strength = "None"
+if 'weakness' not in st.session_state:
+    st.session_state.weakness = "None"
+if 'job_title' not in st.session_state:
+    st.session_state.job_title = "None"
+if 'pdf' not in st.session_state:
+    st.session_state.pdf = "None"
+if 'openai_api_key' not in st.session_state:
+    st.session_state.openai_api_key = "None"
+if 'personal_details' not in st.session_state:
+    st.session_state.personal_details = "None"
 
 
 def streamlit_config():
@@ -81,6 +100,61 @@ class resume_analyzer:
 
         response = chain.run(input_documents=docs, question=analyze)
         return response
+    
+    def personal_detail_prompt(query_with_chunks):
+
+        query = f''' need of name and contacts of the cantidate 
+                    
+                    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+                    {query_with_chunks}
+                    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+                    '''
+        return query
+    
+    def personal_details():
+
+        with st.form(key='Contact'):
+
+            # User Upload the Resume
+            add_vertical_space(1)
+            pdf = st.file_uploader(label='Upload Your Resume', type='pdf')
+            st.session_state.pdf=pdf
+            add_vertical_space(1)
+
+            # Enter OpenAI API Key
+            col1,col2 = st.columns([0.6,0.4])
+            with col1:
+                openai_api_key = st.text_input(label='Enter OpenAI API Key', type='password')
+                st.session_state.openai_api_key=openai_api_key
+            add_vertical_space(2)
+
+            # Click on Submit Button
+            submit = st.form_submit_button(label='Submit')
+            add_vertical_space(1)
+
+        add_vertical_space(3)
+        if submit:
+            if pdf is not None and openai_api_key != '':
+                try:
+                    with st.spinner('Processing...'):
+                    
+                        pdf_chunks = st.session_state.pdf_chunks
+                        summary = st.session_state.summary
+
+                        personal_details_prompt = resume_analyzer.personal_detail_prompt(query_with_chunks=summary)
+
+                        personal_details = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=personal_details_prompt)
+                        st.session_state.personal_details=personal_details
+
+                except Exception as e:
+                    st.markdown(f'<h5 style="text-align: center;color: orange;">{e}</h5>', unsafe_allow_html=True)
+
+            elif pdf is None:
+                st.markdown(f'<h5 style="text-align: center;color: orange;">Please Upload Your Resume</h5>', unsafe_allow_html=True)
+            
+            elif openai_api_key == '':
+                st.markdown(f'<h5 style="text-align: center;color: orange;">Please Enter OpenAI API Key</h5>', unsafe_allow_html=True)
+
 
 
     def summary_prompt(query_with_chunks):
@@ -100,13 +174,13 @@ class resume_analyzer:
 
             # User Upload the Resume
             add_vertical_space(1)
-            pdf = st.file_uploader(label='Upload Your Resume', type='pdf')
+            pdf = st.session_state.pdf
             add_vertical_space(1)
 
             # Enter OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
-                openai_api_key = st.text_input(label='Enter OpenAI API Key', type='password')
+                openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
             # Click on Submit Button
@@ -124,9 +198,9 @@ class resume_analyzer:
                         summary_prompt = resume_analyzer.summary_prompt(query_with_chunks=pdf_chunks)
 
                         summary = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=summary_prompt)
+                        st.session_state.pdf_chunks=pdf_chunks
+                        st.session_state.summary=summary
 
-                    st.markdown(f'<h4 style="color: orange;">Summary:</h4>', unsafe_allow_html=True)
-                    st.write(summary)
 
                 except Exception as e:
                     st.markdown(f'<h5 style="text-align: center;color: orange;">{e}</h5>', unsafe_allow_html=True)
@@ -153,13 +227,13 @@ class resume_analyzer:
 
             # User Upload the Resume
             add_vertical_space(1)
-            pdf = st.file_uploader(label='Upload Your Resume', type='pdf')
+            pdf = st.session_state.pdf
             add_vertical_space(1)
 
             # Enter OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
-                openai_api_key = st.text_input(label='Enter OpenAI API Key', type='password')
+                openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
             # Click on Submit Button
@@ -172,18 +246,13 @@ class resume_analyzer:
                 try:
                     with st.spinner('Processing...'):
                     
-                        pdf_chunks = resume_analyzer.pdf_to_chunks(pdf)
-
-                        summary_prompt = resume_analyzer.summary_prompt(query_with_chunks=pdf_chunks)
-
-                        summary = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=summary_prompt)
+                        pdf_chunks = st.session_state.pdf_chunks
+                        summary = st.session_state.summary
                         
                         strength_prompt = resume_analyzer.strength_prompt(query_with_chunks=summary)
 
                         strength = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=strength_prompt)
-
-                    st.markdown(f'<h4 style="color: orange;">Strength:</h4>', unsafe_allow_html=True)
-                    st.write(strength)
+                        st.session_state.strength=strength
 
                 except Exception as e:
                     st.markdown(f'<h5 style="text-align: center;color: orange;">{e}</h5>', unsafe_allow_html=True)
@@ -211,13 +280,13 @@ class resume_analyzer:
 
             # User Upload the Resume
             add_vertical_space(1)
-            pdf = st.file_uploader(label='Upload Your Resume', type='pdf')
+            pdf = st.session_state.pdf
             add_vertical_space(1)
 
             # Enter OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
-                openai_api_key = st.text_input(label='Enter OpenAI API Key', type='password')
+                openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
             # Click on Submit Button
@@ -230,18 +299,13 @@ class resume_analyzer:
                 try:
                     with st.spinner('Processing...'):
                     
-                        pdf_chunks = resume_analyzer.pdf_to_chunks(pdf)
-
-                        summary_prompt = resume_analyzer.summary_prompt(query_with_chunks=pdf_chunks)
-
-                        summary = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=summary_prompt)
+                        pdf_chunks = st.session_state.pdf_chunks
+                        summary = st.session_state.summary
 
                         weakness_prompt = resume_analyzer.weakness_prompt(query_with_chunks=summary)
 
                         weakness = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=weakness_prompt)
-
-                    st.markdown(f'<h4 style="color: orange;">Weakness and Suggestions:</h4>', unsafe_allow_html=True)
-                    st.write(weakness)
+                        st.session_state.weakness=weakness
 
                 except Exception as e:
                     st.markdown(f'<h5 style="text-align: center;color: orange;">{e}</h5>', unsafe_allow_html=True)
@@ -270,13 +334,13 @@ class resume_analyzer:
 
             # User Upload the Resume
             add_vertical_space(1)
-            pdf = st.file_uploader(label='Upload Your Resume', type='pdf')
+            pdf = st.session_state.pdf
             add_vertical_space(1)
 
             # Enter OpenAI API Key
             col1,col2 = st.columns([0.6,0.4])
             with col1:
-                openai_api_key = st.text_input(label='Enter OpenAI API Key', type='password')
+                openai_api_key = st.session_state.openai_api_key
             add_vertical_space(2)
 
             # Click on Submit Button
@@ -289,18 +353,13 @@ class resume_analyzer:
                 try:
                     with st.spinner('Processing...'):
                     
-                        pdf_chunks = resume_analyzer.pdf_to_chunks(pdf)
-
-                        summary_prompt = resume_analyzer.summary_prompt(query_with_chunks=pdf_chunks)
-
-                        summary = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=summary_prompt)
+                        pdf_chunks = st.session_state.pdf_chunks
+                        summary = st.session_state.summary
 
                         job_title_prompt = resume_analyzer.job_title_prompt(query_with_chunks=summary)
 
                         job_title = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=job_title_prompt)
-
-                    st.markdown(f'<h4 style="color: orange;">Job Titles:</h4>', unsafe_allow_html=True)
-                    st.write(job_title)
+                        st.session_state.job_title=job_title
 
                 except Exception as e:
                     st.markdown(f'<h5 style="text-align: center;color: orange;">{e}</h5>', unsafe_allow_html=True)
@@ -311,6 +370,7 @@ class resume_analyzer:
             elif openai_api_key == '':
                 st.markdown(f'<h5 style="text-align: center;color: orange;">Please Enter OpenAI API Key</h5>', unsafe_allow_html=True)
 
+   
 
 
 class linkedin_scraper:
@@ -577,48 +637,110 @@ class linkedin_scraper:
                 driver.quit()
 
 
+def pdf_creator():
+    with st.form(key='pdf_creator'):
+        add_vertical_space(1)
+        add_vertical_space(1)
+        add_vertical_space(2)
+        submit = st.form_submit_button(label='Create PDF')
+        add_vertical_space(1)
+
+        if submit:
+                try:
+                    with st.spinner('Creating PDF...'):
+
+                        pdf=FPDF('p','mm','A4')
+                        pdf.add_page()
+                        # printing personal details to pdf
+                        pdf.set_font('times', 'BUI', 16)
+                        pdf.cell(180, 10, 'Personal Details:',ln=True)
+                        pdf.set_font('times', '', 12)
+                        pdf.multi_cell(180, 10, st.session_state.personal_details,ln=True)
+                        # printing Summary to pdf
+                        pdf.set_font('times', 'BUI', 16)
+                        pdf.cell(180, 10, '',ln=True)
+                        pdf.cell(180, 10, 'Summary:',ln=True)
+                        pdf.set_font('times', '', 12)
+                        pdf.multi_cell(180, 10, st.session_state.summary,ln=True)
+                        # printing Strength to pdf
+                        pdf.set_font('times', 'BUI', 16)
+                        pdf.cell(180, 10, '',ln=True)
+                        pdf.cell(180, 10, 'Strength:',ln=True)
+                        pdf.set_font('times', '', 12)
+                        pdf.multi_cell(180, 10, st.session_state.strength,ln=True)
+                        # printing weakness to pdf
+                        pdf.set_font('times', 'BUI', 16)
+                        pdf.cell(180, 10, '',ln=True)
+                        pdf.cell(180, 10, 'Weakness:',ln=True)
+                        pdf.set_font('times', '', 12)
+                        pdf.multi_cell(180, 10, st.session_state.weakness,ln=True)
+                        # printing job titles to pdf
+                        pdf.set_font('times', 'BUI', 16)
+                        pdf.cell(180, 10, ' ',ln=True)
+                        pdf.cell(180, 10, 'Job Titles:',ln=True)
+                        pdf.set_font('times', '', 12)
+                        pdf.multi_cell(180, 10, st.session_state.job_title,ln=True)
+                        # saving the output
+                        pdf_output = pdf.output(dest='S')
+
+                        # Encode the PDF output as base64
+                        b64 = base64.b64encode(pdf_output).decode()
+                        
+                        st.success('PDF created successfully!')
+                        
+                        # Download button
+                        st.markdown(get_binary_file_downloader_html(b64, 'Analyzed_Resume.pdf', 'Download PDF'), unsafe_allow_html=True)
+                    
+                        
+                except Exception as e:
+                    st.markdown(f'<h5 style="text-align: center;color: orange;">{e}</h5>', unsafe_allow_html=True)
+
+def get_binary_file_downloader_html(bin_file, file_label='File', button_text='Download'):
+    """Generate HTML for downloading a file from a base64 string."""
+    bin_str = f'data:application/octet-stream;base64,{bin_file}'
+    return f'<a href="{bin_str}" download="{file_label}">{button_text}</a>'
 
 # Streamlit Configuration Setup
 streamlit_config()
 add_vertical_space(5)
 
 
+st.markdown(f'<h4>Personal Details:</h4>',
+                unsafe_allow_html=True)
+resume_analyzer.personal_details()
+st.markdown(f'<h4 style="color: orange;">Personal Details:</h4>', unsafe_allow_html=True)
+st.write(st.session_state.personal_details)
 
-with st.sidebar:
+st.markdown(f'<h4>Summary:</h4>',
+                unsafe_allow_html=True)
+resume_analyzer.resume_summary()
+st.markdown(f'<h4 style="color: orange;">Summary:</h4>', unsafe_allow_html=True)
+st.write(st.session_state.summary)
 
-    add_vertical_space(4)
+st.markdown(f'<h4>Strength:</h4>',
+                unsafe_allow_html=True)
+resume_analyzer.resume_strength()
+st.markdown(f'<h4 style="color: orange;">Strength:</h4>', unsafe_allow_html=True)
+st.write(st.session_state.strength)
 
-    option = option_menu(menu_title='', options=['Summary', 'Strength', 'Weakness', 'Job Titles', 'Linkedin Jobs'],
-                         icons=['house-fill', 'database-fill', 'pass-fill', 'list-ul', 'linkedin'])
+st.markdown(f'<h4>Weakness:</h4>',
+                unsafe_allow_html=True)
+resume_analyzer.resume_weakness()
+st.markdown(f'<h4 style="color: orange;">Weakness:</h4>', unsafe_allow_html=True)
+st.write(st.session_state.weakness)
 
+st.markdown(f'<h4>Job Title:</h4>',
+                unsafe_allow_html=True)
+resume_analyzer.job_title_suggestion()
+st.markdown(f'<h4 style="color: orange;">Job Titles:</h4>', unsafe_allow_html=True)
+st.write(st.session_state.job_title)
 
+st.markdown(f'<h4>Linedin Jobs:</h4>',
+                unsafe_allow_html=True)
+linkedin_scraper.main()
 
-if option == 'Summary':
-
-    resume_analyzer.resume_summary()
-
-
-
-elif option == 'Strength':
-
-    resume_analyzer.resume_strength()
-
-
-
-elif option == 'Weakness':
-
-    resume_analyzer.resume_weakness()
-
-
-
-elif option == 'Job Titles':
-
-    resume_analyzer.job_title_suggestion()
-
-
-
-elif option == 'Linkedin Jobs':
-    
-    linkedin_scraper.main()
+st.markdown(f'<h4>Create PDF:</h4>',
+                unsafe_allow_html=True)
+pdf_creator()
 
 
