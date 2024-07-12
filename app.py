@@ -138,8 +138,11 @@ class resume_analyzer:
                 try:
                     with st.spinner('Processing...'):
                     
-                        pdf_chunks = st.session_state.pdf_chunks
-                        summary = st.session_state.summary
+                        pdf_chunks = resume_analyzer.pdf_to_chunks(pdf)
+
+                        summary_prompt = resume_analyzer.summary_prompt(query_with_chunks=pdf_chunks)
+
+                        summary = resume_analyzer.openai(openai_api_key=openai_api_key, chunks=pdf_chunks, analyze=summary_prompt)
 
                         personal_details_prompt = resume_analyzer.personal_detail_prompt(query_with_chunks=summary)
 
@@ -656,25 +659,21 @@ def pdf_creator():
                         pdf.multi_cell(180, 10, st.session_state.personal_details,ln=True)
                         # printing Summary to pdf
                         pdf.set_font('times', 'BUI', 16)
-                        pdf.cell(180, 10, '',ln=True)
                         pdf.cell(180, 10, 'Summary:',ln=True)
                         pdf.set_font('times', '', 12)
                         pdf.multi_cell(180, 10, st.session_state.summary,ln=True)
                         # printing Strength to pdf
                         pdf.set_font('times', 'BUI', 16)
-                        pdf.cell(180, 10, '',ln=True)
                         pdf.cell(180, 10, 'Strength:',ln=True)
                         pdf.set_font('times', '', 12)
                         pdf.multi_cell(180, 10, st.session_state.strength,ln=True)
                         # printing weakness to pdf
                         pdf.set_font('times', 'BUI', 16)
-                        pdf.cell(180, 10, '',ln=True)
                         pdf.cell(180, 10, 'Weakness:',ln=True)
                         pdf.set_font('times', '', 12)
                         pdf.multi_cell(180, 10, st.session_state.weakness,ln=True)
                         # printing job titles to pdf
                         pdf.set_font('times', 'BUI', 16)
-                        pdf.cell(180, 10, ' ',ln=True)
                         pdf.cell(180, 10, 'Job Titles:',ln=True)
                         pdf.set_font('times', '', 12)
                         pdf.multi_cell(180, 10, st.session_state.job_title,ln=True)
@@ -735,7 +734,7 @@ st.write(st.session_state.weakness)
 st.markdown(f'<h4>Job Titles:</h4>',
                 unsafe_allow_html=True)
 resume_analyzer.job_title_suggestion()
-st.markdown(f'<h4 style="color: orange;">Job Titless:</h4>', unsafe_allow_html=True)
+st.markdown(f'<h4 style="color: orange;">Job Titles:</h4>', unsafe_allow_html=True)
 st.write(st.session_state.job_title)
 
 # LinkedIn Jobs:
