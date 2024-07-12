@@ -91,3 +91,7 @@ To use this project, follow these steps:
 
 🌐 LinkedIn: https://www.linkedin.com/in/vansh-bhatnagar-66465225b/
 
+
+**Deployed**
+
+🔗 URL: ```http://103.159.68.39:8501/```

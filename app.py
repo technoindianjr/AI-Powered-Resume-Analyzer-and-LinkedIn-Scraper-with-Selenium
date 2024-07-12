@@ -643,12 +643,12 @@ def pdf_creator():
         add_vertical_space(1)
         add_vertical_space(1)
         add_vertical_space(2)
-        submit = st.form_submit_button(label='Create PDF')
+        submit = st.form_submit_button(label='Generate')
         add_vertical_space(1)
 
         if submit:
                 try:
-                    with st.spinner('Creating PDF...'):
+                    with st.spinner('Generating PDF...'):
 
                         pdf=FPDF('p','mm','A4')
                         pdf.add_page()
@@ -656,29 +656,34 @@ def pdf_creator():
                         pdf.set_font('times', 'BUI', 16)
                         pdf.cell(180, 10, 'Personal Details:',ln=True)
                         pdf.set_font('times', '', 12)
-                        pdf.multi_cell(180, 10, st.session_state.personal_details,ln=True)
+                        pdf.multi_cell(180, 10, st.session_state.personal_details)
+                        pdf.cell(180, 10, '',ln=True)
                         # printing Summary to pdf
                         pdf.set_font('times', 'BUI', 16)
                         pdf.cell(180, 10, 'Summary:',ln=True)
                         pdf.set_font('times', '', 12)
-                        pdf.multi_cell(180, 10, st.session_state.summary,ln=True)
+                        pdf.multi_cell(180, 10, st.session_state.summary)
+                        pdf.cell(180, 10, '',ln=True)
                         # printing Strength to pdf
                         pdf.set_font('times', 'BUI', 16)
                         pdf.cell(180, 10, 'Strength:',ln=True)
                         pdf.set_font('times', '', 12)
-                        pdf.multi_cell(180, 10, st.session_state.strength,ln=True)
+                        pdf.multi_cell(180, 10, st.session_state.strength)
+                        pdf.cell(180, 10, '',ln=True)
                         # printing weakness to pdf
                         pdf.set_font('times', 'BUI', 16)
                         pdf.cell(180, 10, 'Weakness:',ln=True)
                         pdf.set_font('times', '', 12)
-                        pdf.multi_cell(180, 10, st.session_state.weakness,ln=True)
+                        pdf.multi_cell(180, 10, st.session_state.weakness)
+                        pdf.cell(180, 10, '',ln=True)
                         # printing job titles to pdf
                         pdf.set_font('times', 'BUI', 16)
                         pdf.cell(180, 10, 'Job Titles:',ln=True)
                         pdf.set_font('times', '', 12)
-                        pdf.multi_cell(180, 10, st.session_state.job_title,ln=True)
+                        pdf.multi_cell(180, 10, st.session_state.job_title)
+                        pdf.cell(180, 10, '',ln=True)
                         # saving the output
-                        pdf_output = pdf.output(dest='S')
+                        pdf_output = pdf.output(dest='S').encode('latin1')
 
                         # Encodeing the PDF output as base64
                         b64 = base64.b64encode(pdf_output).decode()
@@ -743,7 +748,7 @@ st.markdown(f'<h4>Linedin Jobs:</h4>',
 linkedin_scraper.main()
 
 #Creating the PDF
-st.markdown(f'<h4>Create PDF:</h4>',
+st.markdown(f'<h4>Generate PDF:</h4>',
                 unsafe_allow_html=True)
 pdf_creator()
 
